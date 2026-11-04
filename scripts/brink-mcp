@@ -1,0 +1,107 @@
+#!/bin/bash
+# Starts Brink's MCP server for Claude Code.
+#
+# The server is brink-mcp, a small sandboxed relay inside Brink.app (Contents/Helpers). It speaks
+# MCP over stdio and passes each tool call to the running Brink, which checks the connection's
+# token and does the work. This script only finds the right copy of Brink, checks that the relay
+# is Cynaptic's, signed and unmodified, before handing it the token, and then becomes the relay.
+#
+# Environment (set by the plugin's .mcp.json from its options; an unset option arrives empty):
+#   BRINK_AGENT_TOKEN  the connection's token; passed through to the relay, never printed
+#   BRINK_EDITION      "Brink" (default) or "Brink Dev"
+#   BRINK_APP          optional path to Brink.app, when Spotlight can't find it
+#
+# With --check, it prints what it found instead of starting the relay:
+#   brink-mcp --check [--edition "Brink Dev"] [--app /path/to/Brink.app]
+
+set -u
+
+team="CU9523SW6L"
+edition="${BRINK_EDITION:-Brink}"
+app="${BRINK_APP:-}"
+check=false
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --check) check=true ;;
+        --edition) edition="${2:-}"; shift ;;
+        --app) app="${2:-}"; shift ;;
+        *) echo "brink-mcp: unknown argument: $1" >&2; exit 2 ;;
+    esac
+    shift
+done
+
+case "$edition" in
+    "Brink Dev") bundle_id="tech.cynaptic.brink.dev"; name="Brink Dev" ;;
+    "Brink" | "") bundle_id="tech.cynaptic.brink"; name="Brink" ;;
+    *) echo "brink-mcp: the edition is \"Brink\" or \"Brink Dev\", not \"$edition\"." >&2; exit 2 ;;
+esac
+
+# Prints why the relay in app $1 can't be used, or nothing if it can.
+relay_problem() {
+    local candidate="$1" relay="$1/Contents/Helpers/brink-mcp" found
+    found=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$candidate/Contents/Info.plist" 2>/dev/null)
+    if [ "$found" != "$bundle_id" ]; then
+        echo "it isn't $name (its bundle id is ${found:-missing})"
+    elif [ ! -x "$relay" ]; then
+        echo "it has no MCP server: AI agent access needs Brink 0.3.0 or later"
+    elif ! /usr/bin/codesign --verify --strict \
+        --test-requirement="=anchor apple generic and identifier \"$bundle_id.mcp\"" "$relay" 2>/dev/null; then
+        echo "its MCP server isn't signed as Brink's, or has been changed"
+    elif ! /usr/bin/codesign -dv "$relay" 2>&1 | /usr/bin/grep -qx "TeamIdentifier=$team"; then
+        echo "its MCP server isn't signed by Cynaptic"
+    fi
+}
+
+# Candidates: the configured path, else the usual places, else wherever Spotlight knows of.
+candidates=()
+if [ -n "$app" ]; then
+    candidates=("${app%/}")
+else
+    for place in "/Applications/$name.app" "$HOME/Applications/$name.app"; do
+        [ -d "$place" ] && candidates+=("$place")
+    done
+    while IFS= read -r place; do
+        [ -n "$place" ] && candidates+=("$place")
+    done < <(/usr/bin/mdfind "kMDItemCFBundleIdentifier == '$bundle_id'" 2>/dev/null)
+fi
+
+chosen=""
+problems=""
+seen=$'\n'
+for candidate in ${candidates[@]+"${candidates[@]}"}; do
+    case "$seen" in *$'\n'"$candidate"$'\n'*) continue ;; esac
+    seen+="$candidate"$'\n'
+    problem=$(relay_problem "$candidate")
+    if [ -z "$problem" ]; then
+        chosen="$candidate"
+        break
+    fi
+    problems+="  $candidate: $problem"$'\n'
+done
+
+if [ -z "$chosen" ]; then
+    {
+        if [ -z "$problems" ]; then
+            echo "brink-mcp: $name isn't installed, or Spotlight can't find it. Set the plugin's Brink app option to where it is."
+        else
+            echo "brink-mcp: no copy of $name here can be used:"
+            printf '%s' "$problems"
+        fi
+    } >&2
+    exit 1
+fi
+
+relay="$chosen/Contents/Helpers/brink-mcp"
+
+if $check; then
+    version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$chosen/Contents/Info.plist" 2>/dev/null)
+    echo "Brink app: $chosen"
+    echo "Version: ${version:-unknown}"
+    echo "MCP server: $relay (signed by Cynaptic, unmodified)"
+    if /usr/bin/pgrep -qf "^$chosen/Contents/MacOS/"; then echo "Running: yes"; else echo "Running: no"; fi
+    [ -n "$problems" ] && printf 'Skipped:\n%s' "$problems"
+    exit 0
+fi
+
+exec "$relay"

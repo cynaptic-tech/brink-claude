@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "brink": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/brink-mcp",
+      "env": {
+        "BRINK_AGENT_TOKEN": "${user_config.token}",
+        "BRINK_EDITION": "${user_config.edition}",
+        "BRINK_APP": "${user_config.app}"
+      }
+    }
+  }
+}

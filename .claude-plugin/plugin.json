@@ -1,0 +1,35 @@
+{
+  "name": "brink",
+  "displayName": "Brink",
+  "version": "0.1.0",
+  "description": "Read and change your Brink notes and task lists, and arrange Brink's workspaces and tabs, through Brink's own MCP server.",
+  "author": {
+    "name": "Cynaptic",
+    "url": "https://www.brinkbar.com"
+  },
+  "homepage": "https://www.brinkbar.com",
+  "repository": "https://github.com/cynaptic-tech/brink-claude",
+  "license": "GPL-3.0-only",
+  "keywords": ["brink", "notes", "tasks", "markdown", "macos", "mcp"],
+  "userConfig": {
+    "token": {
+      "type": "string",
+      "title": "Connection token",
+      "description": "The brk_… token Brink showed when you added a connection for Claude Code. Claude Code keeps it in its secure storage.",
+      "sensitive": true,
+      "required": true
+    },
+    "edition": {
+      "type": "string",
+      "title": "Brink edition",
+      "description": "Which copy of Brink to connect to: the App Store's Brink, or a Brink Dev build.",
+      "options": ["Brink", "Brink Dev"],
+      "default": "Brink"
+    },
+    "app": {
+      "type": "directory",
+      "title": "Brink app (optional)",
+      "description": "Where Brink.app is, if Spotlight can't find it. Leave empty to find it by its bundle id."
+    }
+  }
+}

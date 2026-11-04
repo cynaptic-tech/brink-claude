@@ -1,0 +1,15 @@
+{
+  "name": "brink",
+  "description": "Cynaptic's Claude Code plugin for Brink, the Mac menu-bar app for notes and task lists.",
+  "owner": {
+    "name": "Cynaptic",
+    "url": "https://www.brinkbar.com"
+  },
+  "plugins": [
+    {
+      "name": "brink",
+      "source": "./",
+      "description": "Read and change your Brink notes and task lists, and arrange Brink's workspaces and tabs."
+    }
+  ]
+}
