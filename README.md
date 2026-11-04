@@ -41,7 +41,7 @@ You need Brink with AI agent access (Brink Dev during the prototype), with Brink
    ```
 
    ```bash
-   claude plugin install brink@brink
+   claude plugin install brink@cynaptic-tech
    ```
 
 2. In Brink, turn on AI agent access and add a connection for Claude Code (Settings › AI Agents;
