@@ -1,7 +1,7 @@
 {
   "name": "brink",
   "displayName": "Brink",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Read and change your Brink notes and task lists, and arrange Brink's workspaces and tabs, through Brink's own MCP server.",
   "author": {
     "name": "Cynaptic",
@@ -18,13 +18,6 @@
       "description": "The brk_… token Brink showed when you added a connection for Claude Code. Claude Code keeps it in its secure storage.",
       "sensitive": true,
       "required": true
-    },
-    "edition": {
-      "type": "string",
-      "title": "Brink edition",
-      "description": "Which copy of Brink to connect to: the App Store's Brink, or a Brink Dev build.",
-      "options": ["Brink", "Brink Dev"],
-      "default": "Brink"
     },
     "app": {
       "type": "directory",

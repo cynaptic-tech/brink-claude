@@ -81,7 +81,7 @@ Brink's errors are sentences meant for the user. Pass them on, and:
 
 | Error says | What to do |
 |---|---|
-| Brink isn't running | Ask the user to open Brink (or Brink Dev) |
+| Brink isn't running | Ask the user to open Brink |
 | AI agent access is off | Ask the user to turn it on in Brink |
 | The token isn't one Brink knows | The connection was removed, or the token is wrong: suggest `/brink:setup` |
 | Brink Pro | AI agent access is part of Brink Pro |

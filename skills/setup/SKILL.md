@@ -17,7 +17,7 @@ options, which Claude Code keeps in its secure storage.
 Run:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/brink-mcp" --check --edition "${user_config.edition}"
+"${CLAUDE_PLUGIN_ROOT}/scripts/brink-mcp" --check
 ```
 
 The plugin's Brink app option is: `${user_config.app}`. If that's a path, add `--app` and the path
@@ -28,9 +28,8 @@ and unmodified, and whether Brink is running. It never starts the server, and it
 token (the Bash tool's shell doesn't have it), so it can't check that: step 5 does. If it found an
 MCP server, the version is new enough, whatever number it shows.
 
-- **Not installed, or no MCP server:** AI agent access needs Brink 0.3.0 or later. During the
-  prototype it's only in Brink Dev builds: set the plugin's **Brink edition** option to "Brink Dev"
-  (`/plugin`, then Installed › brink › Configure).
+- **Not installed, or no MCP server:** AI agent access needs Brink 0.3.0 or later: the user
+  updates Brink from the App Store.
 - **Not signed by Cynaptic, or changed:** stop. Don't work around it. That copy of Brink isn't
   genuine, or is damaged; the user should reinstall Brink.
 - **Spotlight can't find it:** set the **Brink app** option to where Brink.app is.
@@ -38,8 +37,7 @@ MCP server, the version is new enough, whatever number it shows.
 
 ## 2. Turn on AI agent access in Brink
 
-AI agent access is part of Brink Pro. In Brink, it's in Settings › AI Agents. In a Brink Dev
-prototype build: the menu bar menu › AI Agents (Prototype) › Allow AI Agents.
+AI agent access is part of Brink Pro. In Brink, it's in Settings › AI Agents.
 
 ## 3. Add a connection
 
@@ -49,16 +47,14 @@ In the same place, the user adds a connection for Claude Code and picks its acce
 - **Read and write:** Claude can also edit notes and task lists, and arrange workspaces and tabs.
   Claude Code still asks before each change, unless the user allowed the tool.
 
-Brink shows the token (`brk_…`) once: the user chooses **Copy Token**. (In Brink Dev, the
-command Brink copies at first holds the token too, after `BRINK_AGENT_TOKEN=`; the plugin needs
-only the token.)
+Brink shows the token (`brk_…`) once: the user chooses **Copy Token**.
 
 ## 4. Give the token to the plugin
 
 The user runs `/plugin`, opens Installed › brink › Configure, and pastes the token into
 **Connection token**. Then `/mcp` › plugin:brink:brink › Reconnect (or `/reload-plugins`).
 
-If the user had added Brink by hand before (`claude mcp add brink …` or `brink-dev`), suggest
+If the user had added Brink by hand before (`claude mcp add brink …`), suggest
 `claude mcp remove <name>`, so Brink's tools aren't listed twice.
 
 ## 5. Check

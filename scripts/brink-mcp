@@ -8,45 +8,40 @@
 #
 # Environment (set by the plugin's .mcp.json from its options; an unset option arrives empty):
 #   BRINK_AGENT_TOKEN  the connection's token; passed through to the relay, never printed
-#   BRINK_EDITION      "Brink" (default) or "Brink Dev"
 #   BRINK_APP          optional path to Brink.app, when Spotlight can't find it
 #
 # With --check, it prints what it found instead of starting the relay:
-#   brink-mcp --check [--edition "Brink Dev"] [--app /path/to/Brink.app]
+#   brink-mcp --check [--app /path/to/Brink.app]
 
 set -u
 
 team="CU9523SW6L"
-edition="${BRINK_EDITION:-Brink}"
+bundle_id="tech.cynaptic.brink"
 app="${BRINK_APP:-}"
 check=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --check) check=true ;;
-        --edition) edition="${2:-}"; shift ;;
         --app) app="${2:-}"; shift ;;
         *) echo "brink-mcp: unknown argument: $1" >&2; exit 2 ;;
     esac
     shift
 done
 
-case "$edition" in
-    "Brink Dev") bundle_id="tech.cynaptic.brink.dev"; name="Brink Dev" ;;
-    "Brink" | "") bundle_id="tech.cynaptic.brink"; name="Brink" ;;
-    *) echo "brink-mcp: the edition is \"Brink\" or \"Brink Dev\", not \"$edition\"." >&2; exit 2 ;;
-esac
-
-# Prints why the relay in app $1 can't be used, or nothing if it can.
+# Prints why the relay in app $1 can't be used, or nothing if it can. The relay's identifier is
+# the app's bundle id plus .mcp, and the app's is Brink's or one under it.
 relay_problem() {
     local candidate="$1" relay="$1/Contents/Helpers/brink-mcp" found
     found=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$candidate/Contents/Info.plist" 2>/dev/null)
-    if [ "$found" != "$bundle_id" ]; then
-        echo "it isn't $name (its bundle id is ${found:-missing})"
-    elif [ ! -x "$relay" ]; then
+    case "$found" in
+        "$bundle_id" | "$bundle_id".*) ;;
+        *) echo "it isn't Brink (its bundle id is ${found:-missing})"; return ;;
+    esac
+    if [ ! -x "$relay" ]; then
         echo "it has no MCP server: AI agent access needs Brink 0.3.0 or later"
     elif ! /usr/bin/codesign --verify --strict \
-        --test-requirement="=anchor apple generic and identifier \"$bundle_id.mcp\"" "$relay" 2>/dev/null; then
+        --test-requirement="=anchor apple generic and identifier \"$found.mcp\"" "$relay" 2>/dev/null; then
         echo "its MCP server isn't signed as Brink's, or has been changed"
     elif ! /usr/bin/codesign -dv "$relay" 2>&1 | /usr/bin/grep -qx "TeamIdentifier=$team"; then
         echo "its MCP server isn't signed by Cynaptic"
@@ -58,7 +53,7 @@ candidates=()
 if [ -n "$app" ]; then
     candidates=("${app%/}")
 else
-    for place in "/Applications/$name.app" "$HOME/Applications/$name.app"; do
+    for place in "/Applications/Brink.app" "$HOME/Applications/Brink.app"; do
         [ -d "$place" ] && candidates+=("$place")
     done
     while IFS= read -r place; do
@@ -83,9 +78,9 @@ done
 if [ -z "$chosen" ]; then
     {
         if [ -z "$problems" ]; then
-            echo "brink-mcp: $name isn't installed, or Spotlight can't find it. Set the plugin's Brink app option to where it is."
+            echo "brink-mcp: Brink isn't installed, or Spotlight can't find it. Set the plugin's Brink app option to where it is."
         else
-            echo "brink-mcp: no copy of $name here can be used:"
+            echo "brink-mcp: no copy of Brink here can be used:"
             printf '%s' "$problems"
         fi
     } >&2

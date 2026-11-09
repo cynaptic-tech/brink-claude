@@ -4,9 +4,8 @@ A Claude Code plugin for [Brink](https://www.brinkbar.com), the Mac menu-bar app
 and task lists. With it, Claude can read and change your notes and task lists, and open, move and
 close Brink's tabs and workspaces, while you work in Claude Code.
 
-> **Prototype.** AI agent access arrives in Brink 0.3.0, as part of Brink Pro. Until then it's
-> only in Brink Dev builds from the `agent-access-prototype` branch of Brink. This plugin follows
-> that prototype, and its tools can still change.
+> **Prototype.** AI agent access arrives in Brink 0.3.0, as part of Brink Pro. This plugin
+> follows it as it's made, and its tools can still change.
 
 ## What's in it
 
@@ -32,7 +31,7 @@ by design. The plugin doesn't go around that.
 
 ## Install
 
-You need Brink with AI agent access (Brink Dev during the prototype), with Brink Pro.
+You need Brink 0.3.0 or later, with Brink Pro.
 
 1. Add this repository as a plugin marketplace and install the plugin:
 
@@ -44,11 +43,10 @@ You need Brink with AI agent access (Brink Dev during the prototype), with Brink
    claude plugin install brink@cynaptic-tech
    ```
 
-2. In Brink, turn on AI agent access and add a connection for Claude Code (Settings › AI Agents;
-   in Brink Dev, the menu bar menu › AI Agents (Prototype)). Choose **Copy Token**: Brink shows
-   the token only once.
+2. In Brink, turn on AI agent access and add a connection for Claude Code (Settings › AI Agents).
+   Choose **Copy Token**: Brink shows the token only once.
 3. In Claude Code, run `/plugin`, open Installed › brink › Configure, and paste the token into
-   **Connection token**. For a Brink Dev build, set **Brink edition** to "Brink Dev".
+   **Connection token**.
 4. Run `/brink:setup` to check the connection.
 
 If you added Brink by hand before (`claude mcp add brink …`), remove that entry
@@ -59,7 +57,6 @@ If you added Brink by hand before (`claude mcp add brink …`), remove that entr
 | Option | |
 |---|---|
 | Connection token | The `brk_…` token from Brink. Claude Code keeps it in its secure storage (the macOS keychain), not in `settings.json` |
-| Brink edition | "Brink" (default) or "Brink Dev" |
 | Brink app | Where Brink.app is, only if Spotlight can't find it |
 
 ## Security
@@ -68,7 +65,7 @@ If you added Brink by hand before (`claude mcp add brink …`), remove that entr
   allows, while Brink is running. Use a **Read only** connection unless you want Claude to make
   changes. Remove the connection in Brink to revoke it at once.
 - **The token goes only to Brink's own server.** Before starting `brink-mcp`,
-  [`scripts/brink-mcp`](scripts/brink-mcp) checks that it's inside the Brink edition you chose, and
+  [`scripts/brink-mcp`](scripts/brink-mcp) checks that it's inside Brink, and
   that it's signed by Cynaptic (team `CU9523SW6L`) and unmodified. Otherwise it refuses to start
   and hands nothing over.
 - **Brink checks every call.** Brink accepts calls only from its own signed server, checks the
@@ -88,7 +85,7 @@ copy of Brink it found and whether its server can be used, then makes one read-o
 | "Brink isn't running" | Open Brink |
 | "AI agent access is off" | Turn it on in Brink |
 | The token isn't one Brink knows | The connection was removed: add a new one and set the token again |
-| No MCP server in Brink.app | Brink is older than 0.3.0, or the edition option names the wrong one |
+| No MCP server in Brink.app | Brink is older than 0.3.0 |
 | Server shows as failed in `/mcp` | Run `/brink:setup`: the check says which copy of Brink it tried and why it couldn't use it |
 
 ## Development
